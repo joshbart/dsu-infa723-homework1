@@ -35,9 +35,8 @@ if __name__ == "__main__":
     logging.info(" Reformatting the ciphertext for analysis...")
     formatted_ciphertext = prepare_ciphertext_for_analysis(ciphertext)
 
-    
+
     print(formatted_ciphertext)
-    # TODO: Normalize the text for analysis
     # TODO: (Optional) Perform some sort of frequency analysis to generate a place to start
     # 
 
