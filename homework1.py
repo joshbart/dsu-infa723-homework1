@@ -18,7 +18,7 @@ def prepare_ciphertext_for_analysis(original_text):
     for character in original_text:
         if character.isalpha():
             formatted_text += character
-    formatted_text.upper()
+    formatted_text = formatted_text.upper()
     return formatted_text
 
 
