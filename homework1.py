@@ -110,7 +110,7 @@ if __name__ == "__main__":
         # I perform the random jump, attempt to decrypt the text, and score the attempt.
         random.shuffle(lucky_jump_key)
         attempted_decryption = SimpleSubstitution(lucky_jump_key).decipher(formatted_ciphertext)
-        lucky_jump_score = fitness_calculation.score(attempted_decryption)
+        lucky_jump_score = fitness_calculation.calculate_score(attempted_decryption)
         local_variant = 0
         
         # From the random jump, I will try a number of different minor variations. 
@@ -122,7 +122,7 @@ if __name__ == "__main__":
             local_variant_key = lucky_jump_key.copy()
             local_variant_key[a],local_variant_key[b] = local_variant_key[b],local_variant_key[a]
             attempted_decryption = SimpleSubstitution(local_variant_key).decipher(formatted_ciphertext)
-            local_variant_score = fitness_calculation.score(attempted_decryption)
+            local_variant_score = fitness_calculation.calculate_score(attempted_decryption)
 
             # If the local variant is better, this can be used as the new local peak to start from. 
             # We continue trying local variations until one is not found better after 1000 attempts. 

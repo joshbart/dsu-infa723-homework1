@@ -12,15 +12,19 @@ class QuadgramAnalysis(object):
             quadgram, count = line.split(separator) 
             self.quadgram_occurances[quadgram] = int(count)
 
+        # To perform the necessary scoring, I need to have some basic 
+        # information about the quadgrams.
         self.L = len(quadgram)
         self.N = sum(self.quadgram_occurances.values())
         
-        #calculate log probabilities
+        # For each of the quadgrams identified in the file, we want to 
+        # calculate a base score. For any that don't occur frequently enough, 
+        # we calculate a default floor value.
         for key in self.quadgram_occurances.keys():
             self.quadgram_occurances[key] = log10(float(self.quadgram_occurances[key])/self.N)
         self.floor = log10(0.01/self.N)
 
-    def score(self,text):
+    def calculate_score(self,text):
         ''' compute the score of text '''
         score = 0
         ngrams = self.quadgram_occurances.__getitem__
