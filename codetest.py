@@ -86,44 +86,60 @@ if __name__ == "__main__":
     # which key is the correct one for decrypting the ciphertext.
     fitness_calculation = QuadgramAnalysis(args.frequency)
 
-
+    # I open the file containing the ciphertext and prepare the ciphertext for analysis.
     ciphertext_file = open(args.ciphertext, "+r")
     initial_ciphertext=ciphertext_file.read()
     formatted_ciphertext = prepare_ciphertext_for_analysis(initial_ciphertext)
 
-    # REFERENCE: This portion is derived from reference 2 in the readme.txt
+    # REFERENCE: The following while loop is derived from reference 2 in the readme.txt
+    # As mentioned in readme.txt, I need a starting key and I need a score for comparison.
     current_key = list("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
     current_score = -100000000
 
-    parentkey = current_key.copy()
-    parentscore = current_score
-    # keep going until we are killed by the user
-    i = 0
-    while target_score > parentscore:
-        i = i+1
-        random.shuffle(parentkey)
-        deciphered = SimpleSubstitution(parentkey).decipher(formatted_ciphertext)
-        parentscore = fitness_calculation.score(deciphered)
-        count = 0
-        while count < 1000:
+    # The goal of the hill climbing algorithm is to find the best possible option 
+    # among lots of small variations. However, one weakness of this algorithm is 
+    # that it can sometimes get stuck on a local maximum. By randomly "jumping" to 
+    # a different key and trying local variations from that key, I can avoid this problem.
+    lucky_jump_key = current_key.copy()
+    lucky_jump_score = current_score
+    attempt = 0
+    
+    while target_score > lucky_jump_score:
+        attempt += 1
+        
+        # I perform the random jump, attempt to decrypt the text, and score the attempt.
+        random.shuffle(lucky_jump_key)
+        attempted_decryption = SimpleSubstitution(lucky_jump_key).decipher(formatted_ciphertext)
+        lucky_jump_score = fitness_calculation.score(attempted_decryption)
+        local_variant = 0
+        
+        # From the random jump, I will try a number of different minor variations. 
+        # The goal of this is to determine if another key is better suited to the 
+        # decryption, i.e. gets the ciphertext closer to recognized English.
+        while local_variant < 1000:
             a = random.randint(0, 25)
             b = random.randint(0, 25)
-            child = parentkey[:]
-            # swap two characters in the child
-            child[a],child[b] = child[b],child[a]
-            deciphered = SimpleSubstitution(child).decipher(formatted_ciphertext)
-            score = fitness_calculation.score(deciphered)
-            # if the child was better, replace the parent with it
-            if score > parentscore:
-                parentscore = score
-                parentkey = child[:]
-                count = 0
-            count = count+1
-        #
-        if parentscore > current_score:
-            current_score = parentscore
-            current_key = parentkey[:]
-            print(f"    [+] Hill climbing algorithm determined a better score on try {i}: {current_score}")
+            local_variant_key = lucky_jump_key.copy()
+            local_variant_key[a],local_variant_key[b] = local_variant_key[b],local_variant_key[a]
+            attempted_decryption = SimpleSubstitution(local_variant_key).decipher(formatted_ciphertext)
+            local_variant_score = fitness_calculation.score(attempted_decryption)
+
+            # If the local variant is better, this can be used as the new local peak to start from. 
+            # We continue trying local variations until one is not found better after 1000 attempts. 
+            # If we reach 1000 attempts, we can be fairly certain we have the local peak.
+            if local_variant_score > lucky_jump_score:
+                lucky_jump_score = local_variant_score
+                lucky_jump_key = local_variant_key.copy()
+                local_variant = 0
+            local_variant += 1
+        
+        # Once we've established a local peak, we track that as the maximum peak. Once we hit the 
+        # projected score of -432, we can safely assume that we have the maximum peak, i.e. we have 
+        # the correct encryption key.
+        if lucky_jump_score > current_score:
+            current_score = lucky_jump_score
+            current_key = lucky_jump_key.copy()
+            print(f"    [+] Hill climbing algorithm determined a better score on attempt #{attempt}: {current_score}")
 
     print("[*] Optimal score achieved. Formatting plaintext message...")
 
