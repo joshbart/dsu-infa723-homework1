@@ -25,7 +25,12 @@ class QuadgramAnalysis(object):
         self.floor = log10(0.01/self.N)
 
     def calculate_score(self,text):
-        ''' compute the score of text '''
+        # This function does exactly what one would expect: given a piece of text 
+        # it calculates a score of how much that text resembles English. It does 
+        # this by comparing the various quadgrams to the text. For each pattern match 
+        # of a quadgram in the text, it adds the individual quadgram score to a running 
+        # total. This total provides an accurate picture of how close to English 
+        # the current text is.
         score = 0
         ngrams = self.quadgram_occurances.__getitem__
         for i in range(len(text)-self.L+1):
